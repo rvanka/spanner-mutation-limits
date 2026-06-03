@@ -1,5 +1,7 @@
 # Spanner Mutation Limits Demo
 
+> **🤖 AI Agents & Harnesses:** If you are an AI assistant tasked with running this demo, please read the [HARNESS_INSTRUCTIONS.md](HARNESS_INSTRUCTIONS.md) file first for step-by-step automated execution instructions.
+
 This repository demonstrates the absolute maximum physical transaction limits of Google Cloud Spanner when executing Data Manipulation Language (DML) statements.
 
 Specifically, it demonstrates how the historical `80,000` mutation-limit counter is bypassed when executing multiple partitioned DML statements within a single transaction, forcing Spanner to fall back on its physical hard limits:
