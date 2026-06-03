@@ -23,8 +23,10 @@ def main():
     
     if not instance.exists():
         logger.info(f"Instance {args.instance} does not exist. Creating...")
-        config_name = f"{client.project_name}/instanceConfigs/regional-us-central1"
-        op = instance.create(configuration_name=config_name, display_name="Spanner Limits Test", node_count=1)
+        instance.configuration_name = f"{client.project_name}/instanceConfigs/regional-us-central1"
+        instance.display_name = "Spanner Limits Test"
+        instance.node_count = 1
+        op = instance.create()
         op.result(1200)
         logger.info("Instance created.")
     
