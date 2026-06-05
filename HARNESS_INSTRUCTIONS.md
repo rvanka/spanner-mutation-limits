@@ -18,14 +18,18 @@ Run the following command:
 ```bash
 python3 insert_max.py --project <PROJECT> --instance <INSTANCE> --database testdb-insert
 ```
-**Validation Goal:** The script attempts to insert 466,186 rows across multiple DML statements. Watch the `stdout`. You must verify that the transaction commits successfully and logs `CommitStats: mutation_count: 932372`. This confirms the 80k counter bypass and the 100MB physical payload ceiling.
+**Validation Goal:** The script attempts to insert 466,186 rows across multiple DML statements but within a **single commit**. Watch the `stdout`. You must verify that the transaction commits successfully and logs `CommitStats: mutation_count: 932372`. This confirms the 80k counter bypass and the 100MB physical payload ceiling.
+
+**Reporting Requirement:** While this test is running, you must explicitly message the user to tell them that 1 single commit is being executed and, upon completion, report the final mutation count (932,372) returned by Spanner.
 
 ## 4. Execute Delete Test (620k Lock Limit)
 Run the following command:
 ```bash
 python3 delete_max.py --project <PROJECT> --instance <INSTANCE> --database testdb-delete
 ```
-**Validation Goal:** This script will take a few minutes to pre-populate 620,000 rows. Once populated, it will execute a single transaction deleting all 620,000 rows across partitioned DML statements. Watch `stdout` to verify the transaction commits successfully. Both the insert and delete tests are expected to succeed.
+**Validation Goal:** This script will take a few minutes to pre-populate 620,000 rows across **16 separate commits** (15 commits of 40,000 rows and 1 commit of 20,000 rows). Once populated, it will execute a **single commit** deleting all 620,000 rows across partitioned DML statements. Watch `stdout` to verify the transaction commits successfully. Both the insert and delete tests are expected to succeed.
+
+**Reporting Requirement:** While this test is running, you must explicitly message the user to inform them that it is currently executing 16 commits to pre-populate the database, followed by 1 massive commit to delete all rows. Upon completion, report the final mutation count (620,000) for the delete transaction returned by Spanner.
 
 ## Important Constraints
 *   Both scripts use `os.environ["GOOGLE_CLOUD_SPANNER_METRICS_ENABLED"] = "false"` and `disable_builtin_metrics=True` on the Spanner client. This is intentional to prevent `gRPC` metric timeseries errors related to missing instance labels. Do not remove these unless explicitly requested by the user.
