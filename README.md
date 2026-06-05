@@ -37,12 +37,20 @@ python3 insert_max.py --project your-project-id --instance your-instance-id --da
 
 ### 2. Test Maximum Deletes
 
-The `delete_max.py` script identifies the memory lock limit. Since `DELETE` statements only supply primary keys, they take up very few bytes. However, Spanner can only buffer and hold row locks for roughly **800,000 rows** per transaction before running out of transaction workspace memory.
+The `delete_max.py` script bypasses the 80k counter limit but stays under the lock limit by targeting 400,000 rows. Spanner can only buffer and hold row locks for roughly 800,000 rows per transaction before running out of transaction workspace memory.
 
-This script first populates the database and then attempts to delete 800,000 rows in a single transaction across multiple DML statements.
+This script first populates the database and then attempts to delete 400,000 rows in a single transaction across multiple DML statements.
 
 ```bash
-python3 delete_max.py --project your-project-id --instance your-instance-id --database testdb-delete
+python3 delete_max.py --project your-project-id --instance your-instance-id --database testdb-delete --rows 400000
+```
+
+### 3. Binary Search for Max Deletes
+
+The `binary_search.py` script automates the process of finding the exact physical limit for your specific schema and payload by running a binary search over a range of row counts using `delete_max.py`.
+
+```bash
+python3 binary_search.py --project your-project-id --instance your-instance-id --database testdb-delete --min 400000 --max 800000
 ```
 
 ### Note on Commit Stats

@@ -8,14 +8,15 @@ os.environ["GOOGLE_CLOUD_SPANNER_METRICS_ENABLED"] = "false"
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
-# This is the approximate internal lock limit for DELETE transactions before hitting resource constraints.
-MAX_DELETE_ROWS = 800000
+# We set this to 400k to safely bypass the 80k counter limit but stay under the 800k lock limit.
+MAX_DELETE_ROWS = 600000
 
 def main():
     parser = argparse.ArgumentParser(description="Spanner Max Delete Limits Test")
     parser.add_argument("--project", required=True, help="Google Cloud Project ID")
     parser.add_argument("--instance", required=True, help="Spanner Instance ID")
     parser.add_argument("--database", required=True, help="Spanner Database ID")
+    parser.add_argument("--rows", type=int, default=400000, help="Number of rows to populate and delete")
     args = parser.parse_args()
 
     client = spanner.Client(project=args.project, disable_builtin_metrics=True)
@@ -46,12 +47,12 @@ def main():
     database.log_commit_stats = True
     
     # Pre-population step
-    logger.info(f"Populating {MAX_DELETE_ROWS} rows for the delete test (using multiple transactions)...")
+    logger.info(f"Populating {args.rows} rows for the delete test (using multiple transactions)...")
     def insert_chunk(txn, s, e):
         sql = f"INSERT INTO TestTable (Id, Val) SELECT x, 'del_test' FROM UNNEST(GENERATE_ARRAY({s}, {e})) AS x"
         txn.execute_update(sql)
 
-    remaining_population = MAX_DELETE_ROWS
+    remaining_population = args.rows
     curr_pop_id = 1
     while remaining_population > 0:
         chunk = min(remaining_population, 40000) # Ensure each insert chunk is under 80k mutations
@@ -63,8 +64,8 @@ def main():
     logger.info("Population complete. Now testing massive delete...")
 
     def run_delete(transaction):
-        logger.info(f"Attempting to delete {MAX_DELETE_ROWS} rows in a single transaction...")
-        remaining = MAX_DELETE_ROWS
+        logger.info(f"Attempting to delete {args.rows} rows in a single transaction...")
+        remaining = args.rows
         curr_id = 1
         total_deleted = 0
         
