@@ -37,12 +37,12 @@ python3 insert_max.py --project your-project-id --instance your-instance-id --da
 
 ### 2. Test Maximum Deletes
 
-The `delete_max.py` script bypasses the 80k counter limit but stays under the lock limit by targeting 400,000 rows. Spanner can only buffer and hold row locks for roughly 800,000 rows per transaction before running out of transaction workspace memory.
+The `delete_max.py` script bypasses the 80k counter limit but stays under the lock limit by targeting 620,000 rows. Spanner can only buffer and hold row locks for roughly 800,000 rows per transaction before running out of transaction workspace memory.
 
-This script first populates the database and then attempts to delete 400,000 rows in a single transaction across multiple DML statements.
+This script first populates the database and then attempts to delete 620,000 rows in a single transaction across multiple DML statements.
 
 ```bash
-python3 delete_max.py --project your-project-id --instance your-instance-id --database testdb-delete --rows 400000
+python3 delete_max.py --project your-project-id --instance your-instance-id --database testdb-delete --rows 620000
 ```
 
 ### 3. Binary Search for Max Deletes

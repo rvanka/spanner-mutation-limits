@@ -16,7 +16,7 @@ def main():
     parser.add_argument("--project", required=True, help="Google Cloud Project ID")
     parser.add_argument("--instance", required=True, help="Spanner Instance ID")
     parser.add_argument("--database", required=True, help="Spanner Database ID")
-    parser.add_argument("--rows", type=int, default=400000, help="Number of rows to populate and delete")
+    parser.add_argument("--rows", type=int, default=620000, help="Number of rows to populate and delete")
     args = parser.parse_args()
 
     client = spanner.Client(project=args.project, disable_builtin_metrics=True)
